@@ -30,7 +30,6 @@ public class AuthController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public NewUserResponseDTO saveUser(@RequestBody @Validated NewUserDTO body, BindingResult validationResult) {
 		if (validationResult.hasErrors()) {
-			System.out.println(validationResult.getAllErrors());
 			throw new BadRequestException(validationResult.getAllErrors());
 		}
 		return new NewUserResponseDTO(this.usersService.save(body).getId());

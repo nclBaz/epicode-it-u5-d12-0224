@@ -1,5 +1,6 @@
 package riccardogulin.u5d12.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @NoArgsConstructor
+@JsonIgnoreProperties({"password", "role", "authorities", "enabled", "accountNonExpired", "credentialsNonExpired", "accountNonLocked"})
 public class User implements UserDetails {
 	@Id
 	@GeneratedValue

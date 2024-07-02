@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import riccardogulin.u5d12.entities.User;
 import riccardogulin.u5d12.exceptions.BadRequestException;
@@ -18,6 +19,9 @@ import java.util.UUID;
 public class UsersService {
 	@Autowired
 	private UsersRepository usersRepository;
+
+	@Autowired
+	private PasswordEncoder bcrypt;
 
 	public Page<User> getUsers(int pageNumber, int pageSize, String sortBy) {
 		if (pageSize > 100) pageSize = 100;
@@ -35,7 +39,7 @@ public class UsersService {
 		);
 
 		// 2. Altrimenti creiamo un nuovo oggetto User e oltre a prendere i valori dal body, aggiungiamo l'avatarURL (ed eventuali altri campi server-generated)
-		User newUser = new User(body.name(), body.surname(), body.email(), body.password());
+		User newUser = new User(body.name(), body.surname(), body.email(), bcrypt.encode(body.password()));
 
 		newUser.setAvatarURL("https://ui-avatars.com/api/?name=" + body.name() + "+" + body.surname());
 
