@@ -2,6 +2,7 @@ package riccardogulin.u5d12.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -9,6 +10,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +28,9 @@ public class Config {
 		httpSecurity.formLogin(http -> http.disable()); // Non voglio il form di login (avremo React per quello)
 		httpSecurity.csrf(http -> http.disable()); // Non voglio la protezione da CSRF (per le nostre app non è necessaria, anzi complicherebbe abbastanza tutta la faccenda, compreso il FE)
 		httpSecurity.sessionManagement(http -> http.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Non voglio le sessioni (perché con JWT non si utilizzano le sessioni)
+
+		httpSecurity.cors(Customizer.withDefaults()); // NON DIMENTICARE QUESTA IMPOSTAZIONE SE SI UTILIZZA UNA CONFIGURAZIONE CORS PERSONALIZZATA
+
 		// Possiamo aggiungere anche dei filtri custom ad es
 		// Possiamo ad es aggiungere/rimuovere determinate regole di protezione per gli endpoint
 		// Possiamo decidere se debba essere necessaria un'autenticazione per accedere ai nostri endpoint
@@ -38,4 +47,17 @@ public class Config {
 		// tra sicurezza e UX.
 		// 11 ad es significa che l'algoritmo verrà eseguito 2^11 volte, cioè 2048. Su un computer di prestazioni medie ciò significa all'incirca 100/200ms
 	}
+
+	@Bean
+	CorsConfigurationSource corsConfigurationSource(){
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://mywonderfulfe.com")); // whitelist dei frontend che possono accedere a questo backend
+		configuration.setAllowedMethods(Arrays.asList("*"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration); // Registro la configurazione CORS appena fatta a livello globale su tutti gli endpoint del mio server
+		return source;
+	} // Non dimentichiamoci di aggiungere l'impostazione cors anche nella security filter chain qua sopra
+
 }
