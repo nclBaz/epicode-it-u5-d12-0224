@@ -12,6 +12,7 @@ import riccardogulin.u5d12.exceptions.BadRequestException;
 import riccardogulin.u5d12.exceptions.NotFoundException;
 import riccardogulin.u5d12.payloads.NewUserDTO;
 import riccardogulin.u5d12.repositories.UsersRepository;
+import riccardogulin.u5d12.tools.MailgunSender;
 
 import java.util.UUID;
 
@@ -22,6 +23,9 @@ public class UsersService {
 
 	@Autowired
 	private PasswordEncoder bcrypt;
+
+	@Autowired
+	private MailgunSender mailgunSender;
 
 	public Page<User> getUsers(int pageNumber, int pageSize, String sortBy) {
 		if (pageSize > 100) pageSize = 100;
@@ -44,7 +48,12 @@ public class UsersService {
 		newUser.setAvatarURL("https://ui-avatars.com/api/?name=" + body.name() + "+" + body.surname());
 
 		// 3. Poi salviamo lo user
-		return usersRepository.save(newUser);
+		User saved = usersRepository.save(newUser);
+
+		// 4. Invio email di conferma
+		mailgunSender.sendRegistrationEmail(saved);
+
+		return saved;
 	}
 
 	public User findById(UUID userId) {
